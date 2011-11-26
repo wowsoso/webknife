@@ -1,0 +1,53 @@
+== Example ==
+view:
+{{{
+    hello = lambda req : get_resp("hello world")
+    hello = lambda req : render("hello.html", {"name" : req["args"]["name"]})
+    hello = lambda req : redirect("/") 
+}}}
+
+settings example(route,session and more):
+{{{
+    touch setting.py
+   
+    from wsgilog import log
+    from wsgistate.memory import session
+    
+    config = {
+        "host" : "127.0.0.1",
+        "port" : 8001,
+        
+        #"get_tpl" : <template engine adapter func>,
+        #"app_404" : <your 404 app>,
+        #"get_rep" : <your request func (must return a dict)>,  
+        #"get_resp" : <your response func (must return a dict)>,
+        
+        "middlewares" : [
+            log(tohtml=True, tofile="wsgi.log", tostream=True, toprint=True),
+            session(),
+            #<your middlewares> 
+        ],
+        "mapping" : [
+            #example:('^/hello/(?P<name>.+)$', ('<module name>', 'view name')),
+        ] 
+    }
+    
+}}}
+
+build-in template engine:
+{{{
+    like django, but only provited if,else,for.
+    if you want use jinja2 or more,please extend in settings.py(rewrite get_tpl function)
+}}}
+
+nginx+uwsgi example:
+{{{
+views:views.py
+    uwsgi --module views --callable get_app -s /tmp/knife.socket -C 664
+
+nginx conf:
+    location / {
+        include : uwsgi_params;
+        uwsgi_pass : unix:///tmp/knife.socket;
+    }
+}}}
