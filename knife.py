@@ -174,7 +174,7 @@ def runserver():
         settings['host'], settings['port'], 
         get_app
     )
-    print "Serving HTTP on port 8001..."
+    print "Serving HTTP on port %d" % settings["port"]
     httpd.serve_forever()
 
 
@@ -209,9 +209,9 @@ except:
     config = {}
 
 settings = {
-    'http_host' : "http://127.0.0.1:8000",
-    "host" : "127.0.0.1",
-    "port" : 8001,
+    'http_host' : "http://0.0.0.0:8000",
+    "host" : "0.0.0.0",
+    "port" : 8000,
     'status_dic' : {
         "200" : "200 ok!",
         "302" : "302 redirect!",
@@ -241,9 +241,12 @@ example_app = lambda req: get_resp("hello!")
 local = threading.local()
 local.tplstream = ""
 
-def example_app(req):
-    return get_resp("hello")
-
 
 if __name__ == "__main__":
+    from optparse import OptionParser
+    parser = OptionParser()
+    parser.add_option("-p", "--port", dest="port", type="int", default=8000, help="listen port")
+    (options, args) = parser.parse_args()
+    settings["http_host"] = "0.0.0.0:%d" % options.port
+    settings["port"] = options.port
     runserver()
